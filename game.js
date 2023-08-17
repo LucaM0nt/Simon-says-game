@@ -15,7 +15,6 @@ $(".btn").on("click", handleClick);
 
 $(document).on("keypress", function () {
   if (!hasGameStarted) {
-    $("h1").text("Level " + level);
     nextSequenceWithDelay();
     hasGameStarted = true;
   }
@@ -46,53 +45,39 @@ function animatePress(color) {
 }
 
 function nextSequenceWithDelay() {
-    setTimeout(function() {
-      var randomNumber = Math.floor(Math.random() * 4);
-      let randomChosenColor = buttonColors[randomNumber];
-      gamePattern.push(randomChosenColor);
-  
-      $("#" + randomChosenColor)
-        .fadeOut(70)
-        .fadeIn(120)
-        .fadeOut(70)
-        .fadeIn(120);
-      colorBtnSound(randomChosenColor);
-  
-      console.log("game pattern: " + gamePattern);
-    }, 500); 
-  }
+  setTimeout(function () {
+    level++;
+    $("h1").text("Level " + level);
+    clickCount = 0;
+    userClickedPattern = [];
+    var randomNumber = Math.floor(Math.random() * 4);
+    let randomChosenColor = buttonColors[randomNumber];
+    gamePattern.push(randomChosenColor);
 
-function nextSequence() {
-  var randomNumber = Math.floor(Math.random() * 4);
-  let randomChosenColor = buttonColors[randomNumber];
-  gamePattern.push(randomChosenColor);
-
-  $("#" + randomChosenColor)
-    .fadeOut(70)
-    .fadeIn(120)
-    .fadeOut(70)
-    .fadeIn(120);
-  colorBtnSound(randomChosenColor);
-
-  console.log("game pattern: " + gamePattern) ///
+    $.each(gamePattern, function (index, color) {
+      setTimeout(function () {
+        $("#" + color)
+          .fadeOut(70)
+          .fadeIn(120)
+          .fadeOut(70)
+          .fadeIn(120);
+        colorBtnSound(color);
+        if (index === gamePattern.length - 1) {
+        }
+      }, index * 500);
+    });
+  }, 500);
 }
 
 function handleClick() {
-    if (hasGameStarted) {
-      let userChosenColor = $(this).attr("id");
-      userClickedPattern.push(userChosenColor);
-      colorBtnSound(userChosenColor);
-      animatePress(userChosenColor);
-      console.log("user clicked: " + userChosenColor) ///
-      console.log("userClickedPattern length is:" + userClickedPattern.length) ///
-      console.log("click count is:" + clickCount) ///
-      console.log("game pattern[click]: " + gamePattern[clickCount]) ///
-      console.log("game pattern length is:" + gamePattern.length) ///
-      clickCheck(userChosenColor);
-
-      
-    }
+  if (hasGameStarted) {
+    let userChosenColor = $(this).attr("id");
+    userClickedPattern.push(userChosenColor);
+    colorBtnSound(userChosenColor);
+    animatePress(userChosenColor);
+    clickCheck(userChosenColor);
   }
+}
 
 function reset() {
   gamePattern = [];
@@ -100,21 +85,21 @@ function reset() {
   hasGameStarted = false;
   level = 0;
   clickCount = 0;
-  $("h1").text("You Lost, presse key to restart");
+  $("h1").text("You Lost, press key to restart");
 }
 
 function clickCheck(currentColor) {
   if (currentColor == gamePattern[clickCount]) {
     clickCount++;
-    if (userClickedPattern.length == gamePattern.length) { // <-- qua c'è un problema
-      clickCount = 0;
-      userClickedPattern = [];
-      level++;
-      $("h1").text("Level " + level);
+    if (userClickedPattern.length == gamePattern.length) {
       nextSequenceWithDelay();
     }
   } else {
     wrongSound.play();
+    $("body").addClass("game-over");
+    setTimeout(function () {
+      $("body").removeClass("game-over");
+    }, 200);
     reset();
   }
 }
